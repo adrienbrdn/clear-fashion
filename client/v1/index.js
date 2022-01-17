@@ -32,7 +32,8 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // I can find on these e-shops
 // 2. Log the variable
 
-
+const cheapestTshirt = 'https://www.loom.fr';
+console.log(cheapestTshirt);
 
 
 
@@ -49,11 +50,24 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // 1. Create a variable and assign it the number of products
 // 2. Log the variable
 
+const marketplaceSize = marketplace.length;
+console.log(marketplaceSize);
+
 
 // 🎯 TODO: Brands name
 // 1. Create a variable and assign it the list of brands name only
 // 2. Log the variable
 // 3. Log how many brands we have
+
+let brandsName = []
+for(let i = 0; i < marketplaceSize; i++)
+{
+  if(!brandsName.includes(marketplace[i].brand))
+  {
+    brandsName.push(marketplace[i].brand);
+  }
+}
+console.log(brandsName);
 
 
 // 🎯 TODO: Sort by price
@@ -61,11 +75,26 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // 2. Create a variable and assign it the list of products by price from lowest to highest
 // 3. Log the variable
 
+function SortByPrice(marketplace)
+{
+  return marketplace.sort((a, b) => a.price - b.price);
+}
+let sorted_price_marketplace = SortByPrice(marketplace);
+console.log(sorted_price_marketplace);
+
 
 // 🎯 TODO: Sort by date
 // 1. Create a function to sort the marketplace objects by products date
 // 2. Create a variable and assign it the list of products by date from recent to old
 // 3. Log the variable
+
+function SortByDate(marketplace)
+{
+  return marketplace.sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+let sorted_date_marketplace = SortByDate(marketplace);
+console.log(sorted_date_marketplace);
+
 
 
 // 🎯 TODO: Filter a specific price range
