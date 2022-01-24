@@ -327,13 +327,13 @@ const COTELE_PARIS = [
 // // 1. Log if we have new products only (true or false)
 // // A new product is a product `released` less than 2 weeks.
 
-let new_products = false;
-for(let i = 0; i < COTELE_PARIS.length && !new_products; i++)
+let new_products = true;
+for(let i = 0; i < COTELE_PARIS.length && new_products; i++)
 {
   let nb_jours = Math.ceil(new Date("2022-01-24") - new Date(COTELE_PARIS[i].released)) / (1000 * 3600 * 24);
-  if(nb_jours < 14)
+  if(nb_jours > 14)
   {
-    new_products = true;
+    new_products = false;
   }
 }
 console.log("New products ? " + new_products);
