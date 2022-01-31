@@ -10,6 +10,8 @@ const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
 const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
+const selectSort = document.querySelector('#sort-select')
+const selectBrand = document.querySelector('#brand-select')
 
 /**
  * Set global value
@@ -87,7 +89,22 @@ const renderPagination = pagination => {
 };
 
 /**
- * Render page selector
+ * Render brand selector
+ * @param  {Object} brands
+ */
+ const renderBrands = brands => {
+  const {currentBrand, brandsList} = brands;
+  const options = Array.from(
+    {'length': brandsList.length},
+    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
+  ).join('');
+
+  selectBrand.innerHTML = options;
+  selectBrand.selectedIndex = currentBrand - 1;
+};
+
+/**
+ * Render indicators
  * @param  {Object} pagination
  */
 const renderIndicators = pagination => {
@@ -111,14 +128,41 @@ const render = (products, pagination) => {
  * @type {[type]}
  */
 selectShow.addEventListener('change', event => {
-  fetchProducts(currentPagination.currentPage, parseInt(event.target.value))
+  fetchProducts(1, parseInt(event.target.value))
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
+});
+
+selectPage.addEventListener('change', event => {
+  fetchProducts(parseInt(event.target.value), parseInt(selectShow.options[selectShow.selectedIndex].value))
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
   const products = await fetchProducts();
-
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
+
+const prods = fetchProducts();
+console.log(prods);
+
+function FindBrands()
+{
+  const prods = fetchProducts(1,139);
+  //console.log(prods);
+  // let brandsName = []
+  // for(let i = 0; i < prods.length; i++)
+  // {
+  //   if(!brandsName.includes(prods[i].brand))
+  //   {
+  //     brandsName.push(prods[i].brand);
+  //   }
+  // }
+  // console.log(brandsName);
+}
+FindBrands();
+
+
+// feature 1 => return to page 1 when i change the number of products
