@@ -79,6 +79,7 @@ module.exports.find = async query => {
 module.exports.close = async () => {
   try {
     await client.close();
+    console.log('Connection closed');
   } catch (error) {
     console.error('🚨 MongoClient.close...', error);
   }
