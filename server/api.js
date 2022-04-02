@@ -10,7 +10,6 @@ const MONGODB_COLLECTION = 'products';
 
 const app = express();
 
-module.exports = app;
 
 app.use(require('body-parser').json());
 app.use(cors());
@@ -18,10 +17,16 @@ app.use(helmet());
 
 app.options('*', cors());
 
+app.get('/', async (request, response) => {
+  const client = await clientPromise;
+  const collection = client.db(MONGODB_DB_NAME).collection(MONGODB_COLLECTION);
+  response.send({'ack': true});
+});
+
 
 app.get('/find/products', async (request, response) => {
   const client = await clientPromise;
-  const collection = await client.db(MONGODB_DB_NAME).collection(MONGODB_COLLECTION);
+  const collection = client.db(MONGODB_DB_NAME).collection(MONGODB_COLLECTION);
 
   const page = parseInt(request.query.page, 10) || 1;
   const size = parseInt(request.query.size, 10) || 12;
@@ -39,5 +44,5 @@ app.get('/find/products', async (request, response) => {
 });
 
 app.listen(PORT);
-
 console.log(`📡 Running on port ${PORT}`);
+module.exports = app;
