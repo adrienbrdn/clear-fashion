@@ -23,23 +23,55 @@ app.get('/', async (request, response) => {
   response.send({'ack': true});
 });
 
+// app.get('/products/:id', async (request, response) => {
+//   const client = await clientPromise;
+//   const collection = client.db(MONGODB_DB_NAME).collection(MONGODB_COLLECTION);
 
-app.get('/find/products', async (request, response) => {
+//   var id;
+
+//   if(request.params.id !== undefined){
+//     id = request.params.id;
+//   }  
+
+//   console.log(request.params);
+
+//   await collection.find({ _id: id }).toArray((error, product) => {
+//     if(error) {
+//         return response.status(500).send(error);
+//     } 
+//     response.send(product);
+//   });
+// });
+
+
+app.get('/products/search', async (request, response) => {
   const client = await clientPromise;
   const collection = client.db(MONGODB_DB_NAME).collection(MONGODB_COLLECTION);
 
-  const page = parseInt(request.query.page, 10) || 1;
-  const size = parseInt(request.query.size, 10) || 12;
-  
+  const page = parseInt(request.query.page) || 1;
+  var limit = parseInt(request.query.limit) || 12;
+  var{offset, limit} = calculateLimitAndOffset(page, limit);
 
-  const { limit, offset } = calculateLimitAndOffset(page, size);
-  const count = await collection.count();
+  const query = {};
+  var brand, price;
 
-  await collection.find({}).sort({price: -1 }).skip(offset).limit(limit).toArray((error, result) => {
+  if(request.query.price !== undefined){
+    price = parseInt(request.query.price);
+    query['price'] = {$lt: price};
+  }  
+
+  if(request.query.brand !== undefined){
+    brand = request.query.brand,
+    query['brand'] = brand;
+  }
+
+  const count = await collection.find(query).sort({ price: 1 }).count();
+
+  await collection.find(query).sort({ price: 1 }).skip(offset).limit(limit).toArray((error, results) => {
     if(error) {
-      return response.status(500).send(error);
+        return response.status(500).send(error);
     }
-    response.send({"found": {"result": result, "meta_data": paginate(page, count, result, limit)}});
+    response.send({"found": {"results": results, "meta_data": paginate(page, count, results, limit)}, "success": true});
   });
 });
 
