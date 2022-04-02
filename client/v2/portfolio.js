@@ -8,40 +8,51 @@ let currentPagination = {};
 // instantiate the selectors
 const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
+const selectBrand = document.querySelector('#brand-select');
+const selectSort = document.querySelector('#sort-select');
 const sectionProducts = document.querySelector('#products');
+const inputReasonable = document.querySelector('#reasonable-select');
 const spanNbProducts = document.querySelector('#nbProducts');
-const selectSort = document.querySelector('#sort-select')
-const selectBrand = document.querySelector('#brand-select')
+const spanP50Price = document.querySelector('#p50Price');
+const spanP90Price = document.querySelector('#p90Price');
+const spanP95Price = document.querySelector('#p95Price');
+
 
 /**
  * Set global value
- * @param {Array} result - products to display
- * @param {Object} meta - pagination meta info
+ * @param {Array} results - products to display
+ * @param {Object} meta_data - pagination meta info
  */
-const setCurrentProducts = ({result, meta}) => {
-  currentProducts = result;
-  currentPagination = meta;
+const setCurrentProducts = ({results, meta_data}) => {
+  currentProducts = results;
+  currentPagination = meta_data;
 };
 
 /**
  * Fetch products from api
  * @param  {Number}  [page=1] - current page to fetch
- * @param  {Number}  [size=12] - size of the page
+ * @param  {Number}  [limit=12] - size of the page
  * @return {Object}
  */
-const fetchProducts = async (page = 1, size = 12) => {
+const fetchProducts = async (page = 1, limit = 12, brand = 'all', reasonable = false) => {
   try {
-    const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
-    );
+    let link_api = `https://clear-fashion-eta.vercel.app/products/search?page=${page}&limit=${limit}`;
+    if(brand !== 'all'){
+      link_api = `https://clear-fashion-eta.vercel.app/products/search?page=${page}&limit=${limit}&brand=${brand}`;
+    }  
+    if(reasonable === true){
+      link_api += '&price=50';
+    }
+    console.log(link_api);
+    console.log(selectSort.value);
+    const response = await fetch(link_api);
     const body = await response.json();
 
     if (body.success !== true) {
       console.error(body);
       return {currentProducts, currentPagination};
     }
-
-    return body.data;
+    return body.found;
   } catch (error) {
     console.error(error);
     return {currentProducts, currentPagination};
@@ -58,9 +69,9 @@ const renderProducts = products => {
   const template = products
     .map(product => {
       return `
-      <div class="product" id=${product.uuid}>
+      <div class="product" id=${product.id}>
         <span>${product.brand}</span>
-        <a href="${product.link}">${product.name}</a>
+        <a href="${product.url_product}">${product.name}</a>
         <span>${product.price}</span>
       </div>
     `;
@@ -78,7 +89,7 @@ const renderProducts = products => {
  * @param  {Object} pagination
  */
 const renderPagination = pagination => {
-  const {currentPage, pageCount} = pagination;
+  const {currentPage, pageCount, pageSize} = pagination;
   const options = Array.from(
     {'length': pageCount},
     (value, index) => `<option value="${index + 1}">${index + 1}</option>`
@@ -89,28 +100,16 @@ const renderPagination = pagination => {
 };
 
 /**
- * Render brand selector
- * @param  {Object} brands
- */
- const renderBrands = brands => {
-  const {currentBrand, brandsList} = brands;
-  const options = Array.from(
-    {'length': brandsList.length},
-    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
-  ).join('');
-
-  selectBrand.innerHTML = options;
-  selectBrand.selectedIndex = currentBrand - 1;
-};
-
-/**
- * Render indicators
+ * Render page selector
  * @param  {Object} pagination
  */
 const renderIndicators = pagination => {
   const {count} = pagination;
 
   spanNbProducts.innerHTML = count;
+  spanP50Price.innerHTML = currentProducts.sort((a, b) => a.price - b.price)[Math.ceil(currentProducts.length * 0.5)].price;
+  spanP90Price.innerHTML = currentProducts.sort((a, b) => a.price - b.price)[Math.ceil(currentProducts.length * 0.9)].price;
+  spanP95Price.innerHTML = ((Math.ceil(currentProducts.length * 0.95) < currentProducts.length)) ? currentProducts.sort((a, b) => a.price - b.price)[Math.ceil(currentProducts.length * 0.95)].price : currentProducts.sort((a, b) => a.price - b.price)[currentProducts.length - 1].price;
 };
 
 const render = (products, pagination) => {
@@ -126,24 +125,11 @@ const render = (products, pagination) => {
 /**
  * Select the number of products to display
  */
-<<<<<<< HEAD
-selectShow.addEventListener('change', event => {
-  fetchProducts(1, parseInt(event.target.value))
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
-});
-
-selectPage.addEventListener('change', event => {
-  fetchProducts(parseInt(event.target.value), parseInt(selectShow.options[selectShow.selectedIndex].value))
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
-=======
 selectShow.addEventListener('change', async (event) => {
-  const products = await fetchProducts(currentPagination.currentPage, parseInt(event.target.value));
+  const products = await fetchProducts(currentPagination.currentPage, parseInt(event.target.value), selectBrand.value, inputReasonable.checked);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
->>>>>>> 22aaa04fe745ab34e6cd99c453640d670cfb4762
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -152,24 +138,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   render(currentProducts, currentPagination);
 });
 
-const prods = fetchProducts();
-console.log(prods);
+selectPage.addEventListener('change', async (event) => {
+  const products = await fetchProducts(parseInt(event.target.value), selectShow.value, selectBrand.value, inputReasonable.checked);
 
-function FindBrands()
-{
-  const prods = fetchProducts(1,139);
-  //console.log(prods);
-  // let brandsName = []
-  // for(let i = 0; i < prods.length; i++)
-  // {
-  //   if(!brandsName.includes(prods[i].brand))
-  //   {
-  //     brandsName.push(prods[i].brand);
-  //   }
-  // }
-  // console.log(brandsName);
-}
-FindBrands();
+  setCurrentProducts(products);
+  render(currentProducts, currentPagination);
+});
 
+selectBrand.addEventListener('change', async (event) => {
+  const products = await fetchProducts(selectPage.value, selectShow.value, event.target.value, inputReasonable.checked);
 
-// feature 1 => return to page 1 when i change the number of products
+  setCurrentProducts(products);
+  render(currentProducts, currentPagination);
+});
+
+inputReasonable.addEventListener('change', async (event) => {
+  const products = await fetchProducts(selectPage.value, selectShow.value, selectBrand.value, event.target.checked);
+
+  setCurrentProducts(products);
+  render(currentProducts, currentPagination);
+});
+
